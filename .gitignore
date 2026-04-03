@@ -13,8 +13,14 @@
 !*.bat
 !*.md
 !*.tcl
+!*.xdc
+
 
 !adc_pa/
+!adc_pa.srcs/
+!sim_1/
+!new/
+
 !verilog/
 !rtl/
 !log/
