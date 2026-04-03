@@ -1,0 +1,50 @@
+# Игнорировать всё по умолчанию
+*
+
+# Но не игнорировать сам .gitignore
+!.gitignore
+
+# Разрешить файлы с нужными расширениями
+!*.do
+!*.sv
+!*.v
+!*.txt
+!*.sh
+!*.bat
+!*.md
+!*.tcl
+
+!adc_pa/
+!verilog/
+!rtl/
+!log/
+!sim/
+!scripts/
+top/
+*.log
+*.jou
+*.pb
+runs/
+proj/
+.Xil/
+*.str
+top/
+*.wdb
+*.log
+*.jou
+*.pb
+*.str
+*.backup
+runs/
+proj/
+.xsim/
+.hw/
+.Xil/
+vivado*.jou
+vivado*.log
+
+# Большие бинарные файлы
+*.bit
+*.mcs
+*.mem
+EOF
