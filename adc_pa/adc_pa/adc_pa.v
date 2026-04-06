@@ -5,6 +5,9 @@ module adc_pa(
     input tx_active_i,
     (* IOB = "TRUE" *) output reg adc_sck_o,
     (* IOB = "TRUE" *) output reg adc_conv_o,
+                       output reg [13:0] adc_data_ch0,      // ������ ������ 0 (�������������� ���)
+                       output reg [13:0] adc_data_ch1, 
+ 
     input adc_sdo_i
 );
 
@@ -19,6 +22,11 @@ reg [3:0] adc_sck_counter;
 reg adc_sck_reg;
 reg adc_sck_reg_prev;  // ��� �������� ������ SCK
 reg adc_conv_reg;
+
+reg [13:0] shift_reg_ch0;     // 14-������ ��������� ������� ��� ������ 0
+reg [13:0] shift_reg_ch1;     // 14-������ ��������� ������� ��� ������ 1
+
+
 RES RES(
     .clk(clk_120_i),
     .rst(rst_i)
@@ -36,12 +44,16 @@ always @(posedge clk_120_i or posedge rst_i) begin
         adc_sck_reg_prev <= 1'b0;
         tx_active_ibuf <= 1'b0;
         tx_active_ibuf_prev <= 1'b0;
+       // reg_ch0 <= 1'b0;
+       // reg_ch1 <= 1'b0;
     end else begin
         adc_sck_counter <= adc_sck_counter + 1;
         adc_conv_o <= adc_conv_reg;
         adc_sck_o <= adc_sck_reg;
         adc_sck_reg_prev <= adc_sck_reg;
         tx_active_ibuf_prev <= tx_active_ibuf;
+       // reg_ch0 <= shift_reg_ch0;    
+       // reg_ch1 <= shift_reg_ch1;
         
         if(adc_sck_counter == 4'd5) begin
             adc_sck_counter <= 4'h0;
@@ -51,6 +63,8 @@ always @(posedge clk_120_i or posedge rst_i) begin
 end
 
 assign tx_active_rise = tx_active_ibuf && !tx_active_ibuf_prev;
+//assign  reg_ch0 = shift_reg_ch0;    
+//assign  reg_ch1 = shift_reg_ch1;
 
 // ============================================================================
 // ������� ������� IOB (��������� always-���� ��� �������)
@@ -81,13 +95,12 @@ reg [4:0] samples_cnt;
 
 
 // �������� ��� ���������� ��������
-reg [13:0] shift_reg_ch0;     // 14-������ ��������� ������� ��� ������ 0
-reg [13:0] shift_reg_ch1;     // 14-������ ��������� ������� ��� ������ 1
+
 reg [5:0]  bit_counter;        // ������� ����� (0-31)
 reg        data_valid_ch0;     // ���� ���������� ������ 0
 reg        data_valid_ch1;     // ���� ���������� ������ 1
-reg  [13:0] adc_data_ch0;       // ������ ������ 0 (�������������� ���)
-reg  [13:0] adc_data_ch1;       // ������ ������ 1 (�������������� ���)
+//reg  [13:0] adc_data_ch0;       // ������ ������ 0 (�������������� ���)
+//reg  [13:0] adc_data_ch1;       // ������ ������ 1 (�������������� ���)
 reg        data_ready;         // ���� ���������� ����� ������
 localparam IDLE = 2'd0;
 localparam DELAY = 2'd1;
@@ -236,25 +249,25 @@ end  // always
  //============================================================================
  //ILA (Integrated Logic Analyzer) - ������ ��� �������
  //============================================================================
-`ifdef SYNTHESIS
-    ila_0 ila_inst (
-        .clk(clk_120_i),
-        .probe0(adc_sck_counter),
-        .probe1(adc_sck_reg),
-        .probe2(delay_counter),
-        .probe3(measurement_counter),
-        .probe4(state),
-        .probe5(adc_conv_reg),
-        .probe6(bit_counter),
-        .probe7(adc_sck_reg),
-        .probe8(adc_sdo_sync),
-        .probe9(adc_sdo_ibuf),
-        .probe10(data_valid_ch0),
-        .probe11(adc_data_ch0),
-        .probe12(data_valid_ch1),
-        .probe13(adc_data_ch1)
-    );
-`endif
+//`ifdef SYNTHESIS
+//    ila_0 ila_inst (
+//        .clk(clk_120_i),
+//        .probe0(adc_sck_counter),
+//        .probe1(adc_sck_reg),
+//        .probe2(delay_counter),
+//        .probe3(measurement_counter),
+//        .probe4(state),
+//        .probe5(adc_conv_reg),
+//        .probe6(bit_counter),
+//        .probe7(adc_sck_reg),
+//        .probe8(adc_sdo_sync),
+//        .probe9(adc_sdo_ibuf),
+//        .probe10(data_valid_ch0),
+//        .probe11(adc_data_ch0),
+//        .probe12(data_valid_ch1),
+//        .probe13(adc_data_ch1)
+//    );
+//`endif
 
 endmodule
 
