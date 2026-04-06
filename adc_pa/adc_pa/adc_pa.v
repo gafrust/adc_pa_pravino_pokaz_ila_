@@ -25,11 +25,19 @@ reg adc_conv_reg;
 
 reg [13:0] shift_reg_ch0;     // 14-������ ��������� ������� ��� ������ 0
 reg [13:0] shift_reg_ch1;     // 14-������ ��������� ������� ��� ������ 1
+wire tx_active_o;
 
 
 RES RES(
     .clk(clk_120_i),
     .rst(rst_i)
+);
+
+pulse_stretcher pulse_stretcher(
+    .clk(clk_120_i),          // 120 МГц
+    .rst(rst_i),
+    .tx_active_in(tx_active_ibuf_prev), // короткий импульс (8 нс)
+    .tx_active_out(tx_active_o) // растянутый импульс (100 нс)
 );
 
 // ============================================================================
