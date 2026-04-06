@@ -7,6 +7,7 @@ module adc_pa(
     (* IOB = "TRUE" *) output reg adc_conv_o,
                        output reg [13:0] adc_data_ch0,      // ������ ������ 0 (�������������� ���)
                        output reg [13:0] adc_data_ch1, 
+                       output reg adc_conv_flag,
  
     input adc_sdo_i
 );
@@ -114,6 +115,13 @@ localparam IDLE = 2'd0;
 localparam DELAY = 2'd1;
 localparam MEASURE = 2'd2;
 
+
+
+
+
+
+
+// Основной конечный автомат
 always @(posedge adc_sck_reg or posedge rst_i) begin
     if (rst_i) begin
         delay_counter       <= 17'd0;
@@ -121,45 +129,59 @@ always @(posedge adc_sck_reg or posedge rst_i) begin
         sum_u_pad           <= 32'd0;
         sum_u_otr           <= 32'd0;
         adc_conv_reg        <= 1'b0;
+        adc_conv_flag       <= 1'b0;     
         state               <= IDLE;
-        samples_cnt          <=5'd31;
+        samples_cnt         <= 5'd0;
     end else begin
         case (state)
-           IDLE: begin
-              delay_counter <= 17'd200;
-           if (tx_active_ibuf && (samples_cnt!=0)/*tx_active_rise*//*tx_active_ibuf ==1 && ~tx_active_ibuf_prev ==0*/)
-              //samples_cnt <= 5'd31;
-             // begin if(tx_active_rise && (samples_cnt!=0))
-              state <= DELAY;
-            else  
-              state <= IDLE;
-              end
-           // end
+            IDLE: begin
+                // Запуск по переднему фронту tx_active_o
+                if (tx_active_o) begin
+                    samples_cnt   <= 5'd31;        // 32 цикла (31..0)
+                    state         <= DELAY;
+                    delay_counter <= 17'd200;      // загрузка задержки
+                end
+            end
+
             DELAY: begin
                 if (delay_counter != 0) begin
                     delay_counter <= delay_counter - 1;
                     if (delay_counter == 1) begin
-                        adc_conv_reg <= 1'b1;
+                        adc_conv_reg <= 1'b1; 
+                        adc_conv_flag <=1'b1;                // начало измерения
                         measurement_counter <= 9'd39;
                         state <= MEASURE;
                     end
                 end
             end
+
             MEASURE: begin
                 adc_conv_reg <= 1'b0;
+                adc_conv_flag <=1'b0;
                 if (measurement_counter != 0) begin
                     measurement_counter <= measurement_counter - 1;
                     if (measurement_counter == 1) begin
-                           if (samples_cnt != 0)
-                          samples_cnt <= samples_cnt - 1;
-                          state <= IDLE;
+                        // Один цикл измерения завершён
+                        if (samples_cnt != 0) begin
+                            samples_cnt <= samples_cnt - 1;
+                            state <= DELAY;
+                            delay_counter <= 17'd200;      // подготовка к следующему циклу
+                        end else begin
+                            state <= IDLE;                 // все 32 цикла выполнены
+                        end
                     end
                 end
             end
+
             default: state <= IDLE;
         endcase
     end
 end
+
+
+
+
+
 
 // ============================================================================
 // ������������� �������� ������� (������ �� ����������������)

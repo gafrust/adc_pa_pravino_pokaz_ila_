@@ -8,6 +8,7 @@ reg         adc_sdo_i;
 reg       tx_active_i;
 wire        adc_sck_o;
 wire        adc_conv_o;
+wire     adc_conv_flag;
 
 wire [13:0] adc_data_ch0;
 wire [13:0] adc_data_ch1;
@@ -24,7 +25,8 @@ adc_pa uut (
     .adc_sdo_i  (adc_sdo_i),
     .adc_data_ch0(adc_data_ch0),
     .adc_data_ch1(adc_data_ch1),
-    .tx_active_i (tx_active_i)
+    .tx_active_i (tx_active_i),
+    .adc_conv_flag(adc_conv_flag)
 );
 
 // ��������� ��������� �������
