@@ -1,0 +1,1 @@
+compile_simlib -simulator questa -family all -language all -library all -directory ./questa_libs

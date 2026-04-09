@@ -1,15 +1,16 @@
-`timescale 1 ns/1 ps
+`timescale 1 ns/1 ns
 
 module adc_pa(
     input clk_120_i,
     input tx_active_i,
+    input adc_sdo_i,
     (* IOB = "TRUE" *) output reg adc_sck_o,
     (* IOB = "TRUE" *) output reg adc_conv_o,
-                       output reg [13:0] adc_data_ch0,      // ������ ������ 0 (�������������� ���)
-                       output reg [13:0] adc_data_ch1, 
-                       output reg adc_conv_flag,
+     output reg [13:0] adc_data_ch0,      // ������ ������ 0 (�������������� ���)
+     output reg [13:0] adc_data_ch1, 
+     output reg adc_conv_flag
  
-    input adc_sdo_i
+    
 );
 
 // ������� ������� � IOB (������ ���� ����� ����� �����)
@@ -265,6 +266,8 @@ always @(posedge adc_sck_reg or posedge rst_i) begin
                     data_ready <= 1'b1;
                     // ���������� ������� ��� ���������� �����
                     bit_counter <= 6'd0;
+                    shift_reg_ch0 <= 14'd0;
+                    shift_reg_ch1 <= 14'd0;
                 end
                 
             end  // if (adc_sck_reg == 1'b1 && adc_sck_reg_prev == 1'b0)
@@ -273,6 +276,8 @@ always @(posedge adc_sck_reg or posedge rst_i) begin
             bit_counter <= 6'd0;
             data_valid_ch0 <= 1'b0;
             data_valid_ch1 <= 1'b0;
+            shift_reg_ch0 <= 14'd0;
+            shift_reg_ch1 <= 14'd0;
         end  // if (state == MEASURE)
     end  // else (�� rst)
 end  // always
